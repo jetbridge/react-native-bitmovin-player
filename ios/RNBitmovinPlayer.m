@@ -18,7 +18,7 @@
 
 - (instancetype)init {
     if ((self = [super init])) {
-        _fullscreen = NO;
+        _fullscreen = YES;
     }
     return self;
 }
