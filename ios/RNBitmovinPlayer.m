@@ -18,7 +18,7 @@
 
 - (instancetype)init {
     if ((self = [super init])) {
-        _fullscreen = YES;
+        _fullscreen = NO;
     }
     return self;
 }
@@ -72,7 +72,6 @@
     if ([config[@"style"][@"fullscreenIcon"] boolValue]) {
         _playerView.fullscreenHandler = self;
     }
-    
     [self addSubview:_playerView];
     [self bringSubviewToFront:_playerView];
 }
@@ -93,6 +92,7 @@
 #pragma mark BMPPlayerListener
 - (void)onReady:(BMPReadyEvent *)event {
     _onReady(@{});
+    [_playerView enterFullscreen];
 }
 
 - (void)onPlay:(BMPPlayEvent *)event {
