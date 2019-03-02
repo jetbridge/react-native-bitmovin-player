@@ -9,9 +9,10 @@
 @synthesize player = _player;
 @synthesize playerView = _playerView;
 
+
 - (void)dealloc {
     [_player destroy];
-    
+
     _player = nil;
     _playerView = nil;
 }
@@ -25,55 +26,77 @@
 
 - (void)setConfiguration:(NSDictionary *)config {
     BMPPlayerConfiguration *configuration = [BMPPlayerConfiguration new];
-    
-    if (!config[@"source"] || !config[@"source"][@"url"]) return;
-    
-    [configuration setSourceItemWithString:config[@"source"][@"url"] error:NULL];
-    
-    if (config[@"source"][@"title"]) {
-        configuration.sourceItem.itemTitle = config[@"source"][@"title"];
-    }
-    
-    if (config[@"poster"] && config[@"poster"][@"url"]) {
-        configuration.sourceItem.posterSource = [NSURL URLWithString:config[@"poster"][@"url"]];
-        configuration.sourceItem.persistentPoster = [config[@"poster"][@"persistent"] boolValue];
-    }
-    
-    if (![config[@"style"][@"uiEnabled"] boolValue]) {
-        configuration.styleConfiguration.uiEnabled = NO;
-    }
-    
-    if ([config[@"style"][@"systemUI"] boolValue]) {
-        configuration.styleConfiguration.userInterfaceType = BMPUserInterfaceTypeSystem;
-    }
-    
-    if (config[@"style"][@"uiCss"]) {
-        configuration.styleConfiguration.playerUiCss = [NSURL URLWithString:config[@"style"][@"uiCss"]];
-    }
-    
-    if (config[@"style"][@"supplementalUiCss"]) {
-        configuration.styleConfiguration.supplementalPlayerUiCss = [NSURL URLWithString:config[@"style"][@"supplementalUiCss"]];
-    }
-    
-    if (config[@"style"][@"uiJs"]) {
-        configuration.styleConfiguration.playerUiJs = [NSURL URLWithString:config[@"style"][@"uiJs"]];
-    }
-    
+
+
+    NSURL *adSourceTag = [NSURL URLWithString:@"https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%3Dlinear&correlator=83223"];
+
+    BMPAdSource *adSource = [[BMPAdSource alloc]initWithTag:adSourceTag ofType:BMPAdSourceTypeIMA];
+    BMPAdItem *adItem = [[BMPAdItem alloc] initWithAdSources:@[adSource] atPosition:@"pre"];
+    BMPAdvertisingConfiguration *adConfig = [[BMPAdvertisingConfiguration alloc] initWithSchedule: @[adItem]];
+    [configuration setAdvertisingConfiguration:adConfig];
+
+//    configuration.playbackConfiguration.muted = YES;
+
+
+//    configuration.sourceItem.itemTitle = config[@"title"];
+
+//    if (config[@"poster"] && config[@"poster"][@"url"]) {
+//        configuration.sourceItem.posterSource = [NSURL URLWithString:config[@"poster"][@"url"]];
+//        configuration.sourceItem.persistentPoster = [config[@"poster"][@"persistent"] boolValue];
+//    }
+
+//    if (![config[@"style"][@"uiEnabled"] boolValue]) {
+//        configuration.styleConfiguration.uiEnabled = NO;
+//    }
+//
+//    if ([config[@"style"][@"systemUI"] boolValue]) {
+//        configuration.styleConfiguration.userInterfaceType = BMPUserInterfaceTypeSystem;
+//    }
+//
+//    if (config[@"style"][@"uiCss"]) {
+//        configuration.styleConfiguration.playerUiCss = [NSURL URLWithString:config[@"style"][@"uiCss"]];
+//    }
+//
+//    if (config[@"style"][@"supplementalUiCss"]) {
+//        configuration.styleConfiguration.supplementalPlayerUiCss = [NSURL URLWithString:config[@"style"][@"supplementalUiCss"]];
+//    }
+//
+//    if (config[@"style"][@"uiJs"]) {
+//        configuration.styleConfiguration.playerUiJs = [NSURL URLWithString:config[@"style"][@"uiJs"]];
+//    }
+    BMPSourceItem *sourceItem = [[BMPSourceItem alloc] initWithUrl:[NSURL URLWithString:@"https://bitmovin-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8"]];
+    //    BMPSourceItem *sourceItem = [[BMPSourceItem alloc] initWithUrl:[NSURL URLWithString:config[@"source"][@"hls"]]];
+
+    [configuration setSourceItem:sourceItem];
     _player = [[BMPBitmovinPlayer alloc] initWithConfiguration:configuration];
-    
+
     [_player addPlayerListener:self];
-    
+
     _playerView = [[BMPBitmovinPlayerView alloc] initWithPlayer:_player frame:self.frame];
     _playerView.autoresizingMask = (UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth);
     _playerView.frame = self.bounds;
-    
-    [_playerView addUserInterfaceListener:self];
 
-    if ([config[@"style"][@"fullscreenIcon"] boolValue]) {
-        _playerView.fullscreenHandler = self;
-    }
+//    [_playerView addUserInterfaceListener:self];
+
+//    if ([config[@"style"][@"fullscreenIcon"] boolValue]) {
+//        _playerView.fullscreenHandler = self;
+//    }
     [self addSubview:_playerView];
     [self bringSubviewToFront:_playerView];
+
+    self.player = _player;
+}
+
+- (void)onAdError:(BMPAdErrorEvent *)event {
+    NSLog(event);
+}
+
+- (void)onAdScheduled:(BMPAdScheduledEvent *)event {
+    NSLog(event);
+}
+
+- (void)onAdStarted:(BMPAdStartedEvent *)event {
+    NSLog(event);
 }
 
 #pragma mark BMPFullscreenHandler protocol
@@ -172,5 +195,7 @@
 - (void)onControlsHide:(BMPControlsHideEvent *)event {
     _onControlsHide(@{});
 }
+
+
 
 @end
